@@ -118,7 +118,7 @@ export const DEFAULT_EXTENSION_SETTINGS: ExtensionSettings = {
   autoTranscribe: true,
   showTranscriptExpandedByDefault: true,
   enableGitHubUpdateCheck: true,
-  githubRepo: 'SmartSolarium/whatsapp-business-local-ai-transcriber',
+  githubRepo: 'Kompetenz-Nord/TransWA',
 };
 
 export const WHISPER_MODEL_ID = 'Systran/faster-whisper-small';

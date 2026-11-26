@@ -33,7 +33,7 @@ git init
 git add .
 git commit -m "Initial release v1.0.0: WhatsApp Business Local AI Transcriber"
 git branch -M main
-git remote add origin https://github.com/<DEIN-USER>/whatsapp-business-local-ai-transcriber.git
+git remote add origin https://github.com/Kompetenz-Nord/TransWA.git
 git push -u origin main
 
 # Release-Tag setzen (löst .github/workflows/release.yml aus)

@@ -13,7 +13,7 @@ test('Semver version comparison detects newer GitHub releases accurately', () =>
 test('GitHub update checker never throws when offline or network fails', async () => {
   const offlineResult = await checkGitHubReleaseUpdate({
     currentVersion: '1.0.0',
-    githubRepo: 'SmartSolarium/whatsapp-business-local-ai-transcriber',
+    githubRepo: 'Kompetenz-Nord/TransWA',
     fetchImpl: async () => {
       throw new Error('Network unreachable');
     },
@@ -24,12 +24,12 @@ test('GitHub update checker never throws when offline or network fails', async (
 
   const updateAvailableResult = await checkGitHubReleaseUpdate({
     currentVersion: '1.0.0',
-    githubRepo: 'SmartSolarium/whatsapp-business-local-ai-transcriber',
+    githubRepo: 'Kompetenz-Nord/TransWA',
     fetchImpl: async () =>
       new Response(
         JSON.stringify({
           tag_name: 'v1.2.0',
-          html_url: 'https://github.com/SmartSolarium/whatsapp-business-local-ai-transcriber/releases/tag/v1.2.0',
+          html_url: 'https://github.com/Kompetenz-Nord/TransWA/releases/tag/v1.2.0',
         }),
         { status: 200 }
       ),
