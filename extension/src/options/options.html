@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Einstellungen & Diagnose – WhatsApp Local AI Transcriber</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="options-container">
+      <header class="page-header">
+        <div>
+          <h1>WhatsApp Business Local AI Transcriber</h1>
+          <p class="subtitle">
+            100 % lokale Verarbeitung über interne WhatsApp-Medienmodule und Whisper Small auf 127.0.0.1:8765.
+          </p>
+        </div>
+      </header>
+
+      <section class="panel">
+        <h2>Lokale Server-Verbindung & Authentifizierung</h2>
+        <form id="settings-form" class="form-grid">
+          <div class="field">
+            <label for="server-url">Lokaler Whisper-Server (ausschließlich 127.0.0.1)</label>
+            <input id="server-url" type="url" value="http://127.0.0.1:8765" required />
+          </div>
+
+          <div class="field">
+            <label for="auth-token">Client-Authentifizierungs-Token (aus Install.ps1 / auth.token)</label>
+            <input
+              id="auth-token"
+              type="password"
+              placeholder="Lokales Token hier einfügen..."
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="field">
+            <label for="language">Spracherkennung</label>
+            <select id="language">
+              <option value="auto">Automatisch (Deutsch & weitere Sprachen)</option>
+              <option value="de">Deutsch priorisieren (de)</option>
+              <option value="en">Englisch (en)</option>
+              <option value="fr">Französisch (fr)</option>
+              <option value="es">Spanisch (es)</option>
+              <option value="it">Italienisch (it)</option>
+              <option value="tr">Türkisch (tr)</option>
+              <option value="pl">Polnisch (pl)</option>
+            </select>
+          </div>
+
+          <div class="checkbox-row">
+            <input id="auto-transcribe" type="checkbox" checked />
+            <label for="auto-transcribe">Neue sichtbare Sprachnachrichten automatisch ohne Play-Klick transkribieren</label>
+          </div>
+
+          <div class="checkbox-row">
+            <input id="update-check" type="checkbox" checked />
+            <label for="update-check">Passive Update-Prüfung über GitHub Releases aktivieren</label>
+          </div>
+
+          <div class="actions-row">
+            <button type="submit" class="btn-primary">Einstellungen speichern</button>
+            <button id="check-health-btn" type="button" class="btn-secondary">Server-Verbindung testen</button>
+            <span id="save-feedback" class="feedback"></span>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Datenschutz & Lokaler Cache</h2>
+        <p class="desc">
+          Es werden ausschließlich Nachrichten-ID, SHA-256-Audio-Hash, Transkript, Modellversion und Zeitstempel lokal gespeichert.
+          Keine Telefonnummern, keine Medienschlüssel, keine Cloud-Übertragung.
+        </p>
+        <div class="actions-row">
+          <button id="clear-cache-btn" type="button" class="btn-danger">Alle gespeicherten Transkripte löschen</button>
+          <span id="cache-feedback" class="feedback"></span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Diagnoseprotokoll (WhatsAppInternalMediaAdapter)</h2>
+        <p class="desc">
+          Dieses Protokoll enthält keine Medienschlüssel, keine Sitzungstoken und keine Kundendaten.
+        </p>
+        <pre id="diagnostics-output" class="diag-pre">Lade Diagnosedaten...</pre>
+        <div class="actions-row">
+          <button id="refresh-diag-btn" type="button" class="btn-secondary">Diagnose aktualisieren</button>
+          <button id="check-update-btn" type="button" class="btn-secondary">Auf GitHub-Update prüfen</button>
+          <span id="update-feedback" class="feedback"></span>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-11-26T07:09:33.334Z",
+  "assets": [
+    {
+      "fileName": "WhatsApp-Local-AI-Transcriber-Chrome-v1.0.0.zip",
+      "sha256": "14bc22d659181da07e3b9287096a5dba93bd2580d3bd4f4b3b43fb83053ce683",
+      "bytes": 24937,
+      "url": "/downloads/WhatsApp-Local-AI-Transcriber-Chrome-v1.0.0.zip"
+    },
+    {
+      "fileName": "WhatsApp-Local-AI-Transcriber-Edge-v1.0.0.zip",
+      "sha256": "21b805277329f641abb4771fa651f2a5386029e78c947b7d56025de883e01eb8",
+      "bytes": 24922,
+      "url": "/downloads/WhatsApp-Local-AI-Transcriber-Edge-v1.0.0.zip"
+    },
+    {
+      "fileName": "WhatsApp-Local-AI-Transcriber-Windows-v1.0.0.zip",
+      "sha256": "b41535575c9b11f6dbb02a44bcecb6581334496680725228543a9c1c3b1a9dfa",
+      "bytes": 73809,
+      "url": "/downloads/WhatsApp-Local-AI-Transcriber-Windows-v1.0.0.zip"
+    }
+  ]
+}

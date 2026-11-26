@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WhatsApp Local AI Transcriber</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup-root">
+      <header class="popup-header">
+        <h1>WhatsApp Local AI</h1>
+        <span id="version-label" class="meta-text">v1.0.0</span>
+      </header>
+
+      <section class="status-section">
+        <div class="status-row">
+          <span class="label">Whisper-Server (127.0.0.1)</span>
+          <strong id="server-status" class="value">Prüfe...</strong>
+        </div>
+        <div class="status-row">
+          <span class="label">Inferenz-Engine</span>
+          <span id="engine-status" class="value">—</span>
+        </div>
+        <div class="status-row">
+          <span class="label">WhatsApp-Medienmodul</span>
+          <span id="adapter-status" class="value">Noch nicht geprüft</span>
+        </div>
+        <div class="status-row">
+          <span class="label">Lokaler Cache</span>
+          <span id="cache-count" class="value">0 Transkripte</span>
+        </div>
+      </section>
+
+      <div id="update-banner" class="update-banner hidden">
+        <span id="update-text">Neue Version verfügbar</span>
+        <a id="update-link" href="#" target="_blank" rel="noopener noreferrer">Release öffnen</a>
+      </div>
+
+      <footer class="popup-actions">
+        <button id="refresh-btn" type="button" class="btn-secondary">Status prüfen</button>
+        <button id="options-btn" type="button" class="btn-primary">Einstellungen & Diagnose</button>
+      </footer>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+node_modules/
+dist/
+dist-extension/
+dist-release/
+.playwright-cli/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.env
+.env.local
+auth.token

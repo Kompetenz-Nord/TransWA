@@ -1,0 +1,45 @@
+name: Build Packages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: TypeScript & Tests prüfen
+        run: |
+          npm run lint
+          npm run typecheck:extension
+          npm run test:extension
+          python3 -m unittest discover -s backend/tests -p "test_*.py" -v
+
+      - name: Chrome-, Edge- & Windows-Pakete bauen
+        run: |
+          npm run build:extension
+          npm run package:release
+
+      - name: Build-Artefakte hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: whatsapp-local-ai-packages
+          path: dist-release/*

@@ -1,0 +1,6 @@
+{
+  "name": "WhatsApp Business Local AI Transcriber",
+  "description": "Lokale WhatsApp-Web-Erweiterung (Chrome & Edge) mit interner WhatsApp-Medienmodul-Integration, lokalem Whisper-Small-Server und GitHub-Release-Installer.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  verify-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Qualitätsprüfungen (TypeScript, Lint, Unit-Tests)
+        run: |
+          npm run lint
+          npm run typecheck:extension
+          npm run test:extension
+          python3 -m unittest discover -s backend/tests -p "test_*.py" -v
+
+      - name: Erweiterung & Release-Pakete erzeugen
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          npm run build:extension
+          npm run package:release
+
+      - name: GitHub Release veröffentlichen
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist-release/WhatsApp-Local-AI-Transcriber-Chrome-*.zip
+            dist-release/WhatsApp-Local-AI-Transcriber-Edge-*.zip
+            dist-release/WhatsApp-Local-AI-Transcriber-Windows-*.zip
+            dist-release/SHA256SUMS.txt
+          generate_release_notes: true

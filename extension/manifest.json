@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "WhatsApp Business Local AI Transcriber",
+  "short_name": "WA Local AI",
+  "version": "1.0.0",
+  "description": "Automatische, vollständig lokale Transkription von WhatsApp-Audionachrichten über interne Medienmodule und lokales Whisper Small.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://web.whatsapp.com/*",
+    "http://127.0.0.1:8765/*"
+  ],
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["injected/main-world.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["content/content-script.js"],
+      "css": ["content/content.css"],
+      "run_at": "document_idle",
+      "world": "ISOLATED"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "WhatsApp Local AI Transcriber",
+    "default_icon": {
+      "16": "assets/icons/icon16.png",
+      "48": "assets/icons/icon48.png"
+    }
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "minimum_chrome_version": "116"
+}

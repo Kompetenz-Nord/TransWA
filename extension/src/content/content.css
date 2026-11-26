@@ -1,0 +1,116 @@
+.wa-local-ai-transcript-box {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: rgba(255, 255, 255, 0.72);
+  color: #111b21;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.wa-local-ai-transcript-box[data-theme="dark"] {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(17, 27, 33, 0.65);
+  color: #e9edef;
+}
+
+.wa-local-ai-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.wa-local-ai-title-group {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.wa-local-ai-title {
+  font-weight: 600;
+  font-size: 12px;
+  color: #008069;
+}
+
+.wa-local-ai-transcript-box[data-theme="dark"] .wa-local-ai-title {
+  color: #00a884;
+}
+
+.wa-local-ai-meta {
+  font-size: 11px;
+  color: #667781;
+}
+
+.wa-local-ai-transcript-box[data-theme="dark"] .wa-local-ai-meta {
+  color: #8696a0;
+}
+
+.wa-local-ai-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wa-local-ai-btn {
+  appearance: none;
+  border: 1px solid rgba(0, 128, 105, 0.25);
+  background: transparent;
+  color: #008069;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.wa-local-ai-transcript-box[data-theme="dark"] .wa-local-ai-btn {
+  border-color: rgba(0, 168, 132, 0.35);
+  color: #00a884;
+}
+
+.wa-local-ai-btn:hover {
+  background: rgba(0, 128, 105, 0.08);
+}
+
+.wa-local-ai-btn-retry {
+  border-color: rgba(220, 38, 38, 0.35);
+  color: #b91c1c;
+}
+
+.wa-local-ai-transcript-box[data-theme="dark"] .wa-local-ai-btn-retry {
+  color: #fca5a5;
+}
+
+.wa-local-ai-body {
+  margin-top: 5px;
+}
+
+.wa-local-ai-text {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.wa-local-ai-pending {
+  margin: 0;
+  font-size: 12px;
+  color: #667781;
+}
+
+.wa-local-ai-error {
+  margin: 0;
+  font-size: 12px;
+  color: #b91c1c;
+}
+
+.wa-local-ai-transcript-box[data-theme="dark"] .wa-local-ai-error {
+  color: #fca5a5;
+}
