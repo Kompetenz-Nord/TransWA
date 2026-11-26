@@ -123,7 +123,7 @@ const serviceWorkerTranscriber: WhisperTranscriber = {
     // Convert ArrayBuffer to base64 chunked for safe Chrome runtime messaging
     const bytes = new Uint8Array(params.audioBuffer);
     let binary = '';
-    const chunkSize = 0x8000;
+    const chunkSize = 0x2000;
     for (let i = 0; i < bytes.length; i += chunkSize) {
       binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
     }

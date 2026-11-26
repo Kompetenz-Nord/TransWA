@@ -4,16 +4,23 @@ from __future__ import annotations
 
 import hmac
 import os
+import re
 import secrets
 from pathlib import Path
 from typing import Optional
 
-from audio_processor import cleanup_temp_file, decode_to_temp_wav, validate_audio_bytes
+from audio_processor import (
+    MAX_AUDIO_BYTES,
+    cleanup_temp_file,
+    decode_to_temp_wav,
+    validate_audio_bytes,
+)
 from whisper_engine import MODEL_NAME, WhisperSmallEngine
 
 SERVER_VERSION = "1.0.0"
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
+ALLOWED_LANGUAGE_RE = re.compile(r"^[a-z]{2,3}$")
 
 
 def get_default_token_path() -> Path:
@@ -56,6 +63,29 @@ def is_allowed_origin(origin: Optional[str]) -> bool:
     return lower.startswith("chrome-extension://") or lower.startswith("extension://")
 
 
+def is_allowed_host(host_header: Optional[str]) -> bool:
+    """Schützt gegen DNS-Rebinding, indem ausschließlich Loopback-Hostnamen akzeptiert werden."""
+    if not host_header:
+        return True
+    cleaned = host_header.strip().lower()
+    if cleaned.startswith("[::1]"):
+        return cleaned == "[::1]" or cleaned.startswith("[::1]:")
+    hostname = cleaned.split(":", 1)[0]
+    return hostname in ("127.0.0.1", "localhost")
+
+
+def normalize_language(language: Optional[str]) -> str:
+    """Validiert das Sprachfeld gegen 'auto' oder einen ISO-639-Code (2-3 Kleinbuchstaben)."""
+    if not language:
+        return "auto"
+    cleaned = language.strip().lower()
+    if cleaned == "auto":
+        return "auto"
+    if not ALLOWED_LANGUAGE_RE.match(cleaned):
+        raise ValueError("Ungültiger Sprachparameter.")
+    return cleaned
+
+
 def verify_client_token(provided_token: Optional[str], expected_token: str) -> bool:
     if not provided_token or not expected_token:
         return False
@@ -70,6 +100,22 @@ def assert_loopback_host(host: str) -> None:
         raise ValueError(
             f"Sicherheitsverstoß: Bindung an '{host}' verboten. Ausschließlich 127.0.0.1 zulässig."
         )
+
+
+async def read_bounded_upload(upload_file, max_bytes: int = MAX_AUDIO_BYTES) -> bytes:
+    """Liest hochgeladene Audiodaten in begrenzten Blöcken, um RAM-Erschöpfung zu verhindern."""
+    chunks: list[bytes] = []
+    total = 0
+    chunk_size = 1024 * 1024  # 1 MB
+    while True:
+        chunk = await upload_file.read(chunk_size)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > max_bytes:
+            raise OverflowError("Audiodatei überschreitet das 50-MB-Limit.")
+        chunks.append(chunk)
+    return b"".join(chunks)
 
 
 def create_app(
@@ -104,6 +150,12 @@ def create_app(
             return JSONResponse(
                 status_code=403,
                 content={"detail": "Origin nicht autorisiert."},
+            )
+        host_header = request.headers.get("host")
+        if not is_allowed_host(host_header):
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "Host-Header nicht autorisiert."},
             )
         return await call_next(request)
 
@@ -140,12 +192,14 @@ def create_app(
         if not verify_client_token(provided, expected_token):
             raise HTTPException(status_code=401, detail="Ungültiges Client-Token.")
 
-        raw_bytes = await audio.read()
+        raw_bytes: Optional[bytes] = None
         wav_path: Optional[str] = None
         try:
+            clean_language = normalize_language(language)
+            raw_bytes = await read_bounded_upload(audio, MAX_AUDIO_BYTES)
             info = validate_audio_bytes(raw_bytes, expected_sha256=audio_sha256)
             wav_path = decode_to_temp_wav(raw_bytes, info.detected_format)
-            result = whisper.transcribe_file(wav_path, language=language)
+            result = whisper.transcribe_file(wav_path, language=clean_language)
             return {
                 "transcript": result.transcript,
                 "language": result.language,
@@ -157,11 +211,13 @@ def create_app(
                 "compute_type": result.compute_type,
                 "model": result.model,
             }
+        except OverflowError as exc:
+            raise HTTPException(status_code=413, detail=str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         finally:
             cleanup_temp_file(wav_path)
-            del raw_bytes
+            raw_bytes = None
 
     return app
 

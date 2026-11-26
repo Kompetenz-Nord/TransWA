@@ -143,6 +143,40 @@ class ServerSecurityTests(unittest.TestCase):
         self.assertFalse(server.verify_client_token("wrong", expected))
         self.assertFalse(server.verify_client_token("", expected))
 
+    def test_host_header_blocks_dns_rebinding(self):
+        self.assertTrue(server.is_allowed_host("127.0.0.1:8765"))
+        self.assertTrue(server.is_allowed_host("localhost:8765"))
+        self.assertTrue(server.is_allowed_host("[::1]:8765"))
+        self.assertFalse(server.is_allowed_host("evil.attacker:8765"))
+        self.assertFalse(server.is_allowed_host("192.168.1.20:8765"))
+
+    def test_language_validation_blocks_injection_or_invalid_codes(self):
+        self.assertEqual(server.normalize_language(None), "auto")
+        self.assertEqual(server.normalize_language("DE"), "de")
+        self.assertEqual(server.normalize_language("auto"), "auto")
+        with self.assertRaises(ValueError):
+            server.normalize_language("../../etc/passwd")
+        with self.assertRaises(ValueError):
+            server.normalize_language("de;rm -rf")
+
+    def test_bounded_upload_rejects_oversized_streams(self):
+        import asyncio
+
+        class FakeUpload:
+            def __init__(self, chunks):
+                self._chunks = list(chunks)
+
+            async def read(self, size=-1):
+                return self._chunks.pop(0) if self._chunks else b""
+
+        oversized = FakeUpload([b"a" * 64, b"b" * 64])
+        with self.assertRaises(OverflowError):
+            asyncio.run(server.read_bounded_upload(oversized, max_bytes=100))
+
+        valid = FakeUpload([b"a" * 40, b"b" * 40])
+        result = asyncio.run(server.read_bounded_upload(valid, max_bytes=100))
+        self.assertEqual(len(result), 80)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -36,6 +36,7 @@ export class TranscriptionQueue {
   private readonly pendingIds: string[] = [];
   private readonly activeIds = new Set<string>();
   private readonly processedOrQueuedIds = new Set<string>();
+  private readonly enqueuingPromises = new Map<string, Promise<TranscriptionJob>>();
   private readonly jobs = new Map<string, TranscriptionJob>();
   private readonly listeners = new Set<JobListener>();
 
@@ -71,6 +72,29 @@ export class TranscriptionQueue {
   }
 
   async enqueue(messageId: string, direction: VoiceDirection, forceRetry = false): Promise<TranscriptionJob> {
+    if (!forceRetry) {
+      if (this.processedOrQueuedIds.has(messageId)) {
+        const existing = this.jobs.get(messageId);
+        if (existing) return existing;
+      }
+      const inFlight = this.enqueuingPromises.get(messageId);
+      if (inFlight) return inFlight;
+    }
+
+    const promise = this.performEnqueue(messageId, direction, forceRetry).finally(() => {
+      this.enqueuingPromises.delete(messageId);
+    });
+    if (!forceRetry) {
+      this.enqueuingPromises.set(messageId, promise);
+    }
+    return promise;
+  }
+
+  private async performEnqueue(
+    messageId: string,
+    direction: VoiceDirection,
+    forceRetry: boolean
+  ): Promise<TranscriptionJob> {
     if (!forceRetry && this.processedOrQueuedIds.has(messageId)) {
       const existing = this.jobs.get(messageId);
       if (existing) return existing;

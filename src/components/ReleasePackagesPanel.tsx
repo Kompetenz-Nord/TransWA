@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Download, FileCheck2, Terminal } from 'lucide-react';
+import { Check, Copy, Download, FileCheck2, Terminal } from 'lucide-react';
 import type { ReleaseManifest } from '../data/projectData';
 import { downloadVerifiedZip } from '../utils/downloadZip';
 
@@ -15,6 +15,7 @@ export function ReleasePackagesPanel() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
+  const [copiedHashFile, setCopiedHashFile] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -53,6 +54,19 @@ export function ReleasePackagesPanel() {
     }
   };
 
+  const handleCopyHash = async (fileName: string, sha256: string) => {
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error('Zwischenablage nicht verfügbar');
+      }
+      await navigator.clipboard.writeText(sha256);
+      setCopiedHashFile(fileName);
+      setTimeout(() => setCopiedHashFile(null), 1500);
+    } catch {
+      setDownloadError('Zwischenablage im Browser blockiert — SHA-256 bitte direkt aus der Karte kopieren.');
+    }
+  };
+
   const getLabelForAsset = (fileName: string): { title: string; subtitle: string } => {
     if (fileName.includes('Chrome')) {
       return {
@@ -74,18 +88,30 @@ export function ReleasePackagesPanel() {
 
   return (
     <section className="space-y-6">
-      <div className="bg-white border border-slate-200 rounded-xl p-6 space-y-2">
-        <h2 className="text-base font-semibold text-slate-900">
-          Installationspakete &amp; SHA-256-Prüfsummen
-        </h2>
-        <p className="text-sm text-slate-600 max-w-3xl">
-          Alle Pakete werden reproduzierbar aus diesem Repository gebaut. Laden Sie die fertigen
-          ZIP-Archive direkt herunter oder lösen Sie einen automatischen GitHub Release über einen
-          Versions-Tag wie <span className="font-mono text-slate-900">v1.0.0</span> aus.
-        </p>
-        {downloadError && (
-          <p className="text-xs font-medium text-red-700 pt-1">{downloadError}</p>
-        )}
+      <div className="bg-white border border-slate-200 rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-2">
+          <h2 className="text-base font-semibold text-slate-900">
+            Installationspakete &amp; SHA-256-Prüfsummen
+          </h2>
+          <p className="text-sm text-slate-600 max-w-3xl">
+            Alle Pakete werden reproduzierbar aus diesem Repository gebaut. Laden Sie die fertigen
+            ZIP-Archive direkt herunter oder lösen Sie einen automatischen GitHub Release über einen
+            Versions-Tag wie <span className="font-mono text-slate-900">v1.0.0</span> aus.
+          </p>
+          {downloadError && (
+            <p role="alert" className="text-xs font-medium text-red-700 pt-1">
+              {downloadError}
+            </p>
+          )}
+        </div>
+        <a
+          href="/downloads/SHA256SUMS.txt"
+          download="SHA256SUMS.txt"
+          className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg transition-colors whitespace-nowrap shrink-0"
+        >
+          <Download className="w-3.5 h-3.5" />
+          SHA256SUMS.txt
+        </a>
       </div>
 
       {loadError ? (
@@ -107,6 +133,7 @@ export function ReleasePackagesPanel() {
           {manifest.assets.map((asset) => {
             const info = getLabelForAsset(asset.fileName);
             const isBusy = downloadingFile === asset.fileName;
+            const isCopied = copiedHashFile === asset.fileName;
             return (
               <div
                 key={asset.fileName}
@@ -128,7 +155,17 @@ export function ReleasePackagesPanel() {
                     </span>
                   </div>
                   <div className="text-[11px] text-slate-500">
-                    <span>SHA-256:</span>
+                    <div className="flex items-center justify-between">
+                      <span>SHA-256:</span>
+                      <button
+                        type="button"
+                        onClick={() => void handleCopyHash(asset.fileName, asset.sha256)}
+                        className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 hover:underline"
+                      >
+                        {isCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        {isCopied ? 'Kopiert' : 'Hash kopieren'}
+                      </button>
+                    </div>
                     <div className="font-mono text-[10px] text-slate-700 break-all mt-0.5">
                       {asset.sha256}
                     </div>
@@ -137,7 +174,7 @@ export function ReleasePackagesPanel() {
                     href={asset.url}
                     download={asset.fileName}
                     onClick={(e) => void handleDownload(e, asset.url, asset.fileName)}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg transition-colors"
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
                   >
                     <Download className="w-3.5 h-3.5" />
                     {isBusy ? 'Prüfe & lade ZIP...' : 'Paket herunterladen'}

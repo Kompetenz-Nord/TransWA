@@ -11,15 +11,21 @@ type ActiveSection = 'adapter' | 'server' | 'tests' | 'packages';
 export default function App() {
   const [activeSection, setActiveSection] = useState<ActiveSection>('adapter');
   const [downloadingTop, setDownloadingTop] = useState(false);
+  const [topDownloadError, setTopDownloadError] = useState<string | null>(null);
 
   const handleTopDownload = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     if (downloadingTop) return;
     setDownloadingTop(true);
+    setTopDownloadError(null);
     try {
       await downloadVerifiedZip(
         '/downloads/WhatsApp-Local-AI-Transcriber-Windows-v1.0.0.zip',
         'WhatsApp-Local-AI-Transcriber-Windows-v1.0.0.zip'
+      );
+    } catch (err) {
+      setTopDownloadError(
+        err instanceof Error ? err.message : 'ZIP-Download konnte nicht abgeschlossen werden.'
       );
     } finally {
       setDownloadingTop(false);
@@ -37,7 +43,7 @@ export default function App() {
               e.preventDefault();
               setActiveSection('adapter');
             }}
-            className="text-sm sm:text-base font-bold tracking-tight text-slate-900 whitespace-nowrap truncate font-display"
+            className="text-sm sm:text-base font-bold tracking-tight text-slate-900 whitespace-nowrap truncate font-display focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 rounded"
           >
             WhatsApp Local AI Transcriber
           </a>
@@ -46,7 +52,8 @@ export default function App() {
             <button
               type="button"
               onClick={() => setActiveSection('adapter')}
-              className={`whitespace-nowrap shrink-0 transition-colors pb-0.5 border-b-2 ${
+              aria-current={activeSection === 'adapter' ? 'page' : undefined}
+              className={`whitespace-nowrap shrink-0 transition-colors pb-0.5 border-b-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700 ${
                 activeSection === 'adapter'
                   ? 'border-emerald-700 text-slate-900'
                   : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -57,7 +64,8 @@ export default function App() {
             <button
               type="button"
               onClick={() => setActiveSection('server')}
-              className={`whitespace-nowrap shrink-0 transition-colors pb-0.5 border-b-2 ${
+              aria-current={activeSection === 'server' ? 'page' : undefined}
+              className={`whitespace-nowrap shrink-0 transition-colors pb-0.5 border-b-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700 ${
                 activeSection === 'server'
                   ? 'border-emerald-700 text-slate-900'
                   : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -68,7 +76,8 @@ export default function App() {
             <button
               type="button"
               onClick={() => setActiveSection('tests')}
-              className={`whitespace-nowrap shrink-0 transition-colors pb-0.5 border-b-2 ${
+              aria-current={activeSection === 'tests' ? 'page' : undefined}
+              className={`whitespace-nowrap shrink-0 transition-colors pb-0.5 border-b-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700 ${
                 activeSection === 'tests'
                   ? 'border-emerald-700 text-slate-900'
                   : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -79,7 +88,8 @@ export default function App() {
             <button
               type="button"
               onClick={() => setActiveSection('packages')}
-              className={`whitespace-nowrap shrink-0 transition-colors pb-0.5 border-b-2 ${
+              aria-current={activeSection === 'packages' ? 'page' : undefined}
+              className={`whitespace-nowrap shrink-0 transition-colors pb-0.5 border-b-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700 ${
                 activeSection === 'packages'
                   ? 'border-emerald-700 text-slate-900'
                   : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -94,7 +104,7 @@ export default function App() {
               href="/downloads/WhatsApp-Local-AI-Transcriber-Windows-v1.0.0.zip"
               download="WhatsApp-Local-AI-Transcriber-Windows-v1.0.0.zip"
               onClick={handleTopDownload}
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg transition-colors whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg transition-colors whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
             >
               <Download className="w-3.5 h-3.5" />
               <span className="sm:hidden">{downloadingTop ? 'Lade...' : 'Paket (.zip)'}</span>
@@ -119,7 +129,8 @@ export default function App() {
               key={id}
               type="button"
               onClick={() => setActiveSection(id)}
-              className={`px-2 py-1.5 rounded-md text-center whitespace-nowrap truncate ${
+              aria-current={activeSection === id ? 'page' : undefined}
+              className={`px-2 py-1.5 rounded-md text-center whitespace-nowrap truncate focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-emerald-700 ${
                 activeSection === id
                   ? 'bg-emerald-700 text-white'
                   : 'text-slate-600 hover:bg-slate-100'
@@ -132,6 +143,21 @@ export default function App() {
       </header>
 
       <main className="max-w-7xl w-full mx-auto px-6 py-8 flex-1 space-y-6">
+        {topDownloadError && (
+          <div
+            role="alert"
+            className="bg-red-50 border border-red-200 text-red-800 rounded-xl px-4 py-3 text-xs flex items-center justify-between gap-4"
+          >
+            <span>{topDownloadError}</span>
+            <button
+              type="button"
+              onClick={() => setTopDownloadError(null)}
+              className="font-semibold underline shrink-0"
+            >
+              Schließen
+            </button>
+          </div>
+        )}
         {/* Clean Editorial Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-slate-200">
           <div className="space-y-1.5 max-w-3xl">

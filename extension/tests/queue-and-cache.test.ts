@@ -187,3 +187,68 @@ test('TranscriptionQueue handles errors and supports manual retry, and cache cle
   await cache.clearAll();
   assert.equal(await cache.count(), 0);
 });
+
+test('TranscriptionQueue deduplicates concurrent enqueue calls during slow async cache lookup', async () => {
+  const baseStorage = new MemoryStorageAdapter();
+  const slowStorage = {
+    async getItem(key: string) {
+      await new Promise((r) => setTimeout(r, 15));
+      return baseStorage.getItem(key);
+    },
+    async setItem(key: string, value: string) {
+      return baseStorage.setItem(key, value);
+    },
+    async removeItem(key: string) {
+      return baseStorage.removeItem(key);
+    },
+  };
+  const cache = new LocalTranscriptCache(slowStorage);
+  let fetchCalls = 0;
+  let transcribeCalls = 0;
+
+  const fetcher: AudioFetcher = {
+    async fetchVoiceAudio(messageId) {
+      fetchCalls++;
+      const buf = makeAudioBuffer(42);
+      return {
+        messageId,
+        direction: 'incoming',
+        mimetype: 'audio/ogg',
+        durationSec: 6,
+        byteLength: buf.byteLength,
+        buffer: buf,
+        metadata: {
+          messageId,
+          direction: 'incoming',
+          type: 'ptt',
+          mimetype: 'audio/ogg',
+          durationSec: 6,
+          hasDirectPath: true,
+          hasEncFilehash: true,
+          hasFilehash: true,
+          hasMediaKey: true,
+          mediaKeyTimestamp: null,
+        },
+      };
+    },
+  };
+
+  const transcriber: WhisperTranscriber = {
+    async transcribe() {
+      transcribeCalls++;
+      return { transcript: 'Race-Test bestanden.', language: 'de' };
+    },
+  };
+
+  const queue = new TranscriptionQueue({ cache, fetcher, transcriber });
+  await Promise.all([
+    queue.enqueue('false_race_1', 'incoming'),
+    queue.enqueue('false_race_1', 'incoming'),
+    queue.enqueue('false_race_1', 'incoming'),
+  ]);
+  await new Promise((r) => setTimeout(r, 60));
+
+  assert.equal(fetchCalls, 1);
+  assert.equal(transcribeCalls, 1);
+  assert.equal(queue.getJob('false_race_1')?.status, 'completed');
+});

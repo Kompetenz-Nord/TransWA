@@ -29,13 +29,25 @@ function ensureReleaseDownloadsPlugin(): Plugin {
       ensureBuilt();
       server.middlewares.use('/downloads', (req, res, next) => {
         if (!req.url) return next();
-        const cleanRel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '');
-        if (!cleanRel || cleanRel.includes('..') || cleanRel.includes('/')) {
+        let cleanRel: string;
+        try {
+          cleanRel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '');
+        } catch {
+          res.statusCode = 400;
+          res.end('Bad request');
+          return;
+        }
+        if (!cleanRel || cleanRel.includes('..') || cleanRel.includes('/') || cleanRel.includes('\\')) {
           res.statusCode = 404;
           res.end('Not found');
           return;
         }
-        const filePath = path.join(downloadsDir, cleanRel);
+        const filePath = path.resolve(downloadsDir, cleanRel);
+        if (!filePath.startsWith(downloadsDir + path.sep)) {
+          res.statusCode = 403;
+          res.end('Forbidden');
+          return;
+        }
         if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
           res.statusCode = 404;
           res.end('Release artifact not found');

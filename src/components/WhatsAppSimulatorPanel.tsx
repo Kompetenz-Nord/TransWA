@@ -90,6 +90,7 @@ export function WhatsAppSimulatorPanel() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [diagnostics, setDiagnostics] = useState<AdapterDiagnosticReport | null>(null);
   const [cacheCount, setCacheCount] = useState(0);
+  const [cacheNotice, setCacheNotice] = useState<string | null>(null);
 
   const storageRef = useRef(new MemoryStorageAdapter());
   const cacheRef = useRef(new LocalTranscriptCache(storageRef.current));
@@ -307,17 +308,24 @@ export function WhatsAppSimulatorPanel() {
     queue.clearTrackedJobs();
     setJobs({});
     setCacheCount(0);
+    setCacheNotice('Lokaler Cache geleert.');
+    setTimeout(() => setCacheNotice(null), 2000);
     for (const m of messagesRef.current) {
       void queue.enqueue(m.messageId, m.direction, false);
     }
   };
 
-  const handleCopy = (messageId: string, text: string) => {
-    if (navigator.clipboard) {
-      void navigator.clipboard.writeText(text);
+  const handleCopy = async (messageId: string, text: string) => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      }
+      setCopiedId(messageId);
+      setTimeout(() => setCopiedId(null), 1500);
+    } catch {
+      setCacheNotice('Zwischenablage im Browser blockiert.');
+      setTimeout(() => setCacheNotice(null), 2000);
     }
-    setCopiedId(messageId);
-    setTimeout(() => setCopiedId(null), 1500);
   };
 
   return (
@@ -512,7 +520,7 @@ export function WhatsAppSimulatorPanel() {
                           <>
                             <button
                               type="button"
-                              onClick={() => handleCopy(msg.messageId, job.transcript ?? '')}
+                              onClick={() => void handleCopy(msg.messageId, job.transcript ?? '')}
                               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border ${
                                 waDark
                                   ? 'border-[#00a884]/40 text-[#00a884] hover:bg-[#00a884]/10'
@@ -603,12 +611,18 @@ export function WhatsAppSimulatorPanel() {
               <button
                 type="button"
                 onClick={handleClearCache}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-red-700 bg-white border border-red-200 hover:bg-red-50 rounded-lg transition-colors"
+                disabled={cacheCount === 0}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-red-700 bg-white border border-red-200 hover:bg-red-50 disabled:opacity-45 disabled:cursor-not-allowed rounded-lg transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Cache leeren ({cacheCount})
               </button>
             </div>
+            {cacheNotice && (
+              <p role="status" className="text-xs font-medium text-emerald-700">
+                {cacheNotice}
+              </p>
+            )}
 
             {diagnostics?.status === 'READY' ? (
               <div className="flex items-start gap-2.5 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs">

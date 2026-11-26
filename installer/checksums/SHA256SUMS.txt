@@ -1,3 +1,3 @@
-14bc22d659181da07e3b9287096a5dba93bd2580d3bd4f4b3b43fb83053ce683  WhatsApp-Local-AI-Transcriber-Chrome-v1.0.0.zip
-21b805277329f641abb4771fa651f2a5386029e78c947b7d56025de883e01eb8  WhatsApp-Local-AI-Transcriber-Edge-v1.0.0.zip
-b41535575c9b11f6dbb02a44bcecb6581334496680725228543a9c1c3b1a9dfa  WhatsApp-Local-AI-Transcriber-Windows-v1.0.0.zip
+df8e563b840265c5f2b99717bfbdd4904ae0b76ea3f479f498326f4fb8ab2f2b  WhatsApp-Local-AI-Transcriber-Chrome-v1.0.0.zip
+1f0e94f99c23d2d3a37d7a3666248d8b80e10622cdc3bfba04926a42fe76e2c2  WhatsApp-Local-AI-Transcriber-Edge-v1.0.0.zip
+09da4398a353968daec4767ac381c30cd49325a7458615bfb62043bbb8d4d2da  WhatsApp-Local-AI-Transcriber-Windows-v1.0.0.zip

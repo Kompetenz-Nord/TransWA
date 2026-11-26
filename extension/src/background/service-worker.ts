@@ -162,7 +162,15 @@ async function transcribeWithLocalWhisper(payload: {
   }
 
   // Decode base64 back into binary Blob for multipart upload to 127.0.0.1:8765
-  const rawBinary = atob(payload.audioBase64);
+  if (!payload?.audioBase64 || typeof payload.audioBase64 !== 'string') {
+    return { ok: false, error: 'Ungültige Audiodaten empfangen.' };
+  }
+  let rawBinary: string;
+  try {
+    rawBinary = atob(payload.audioBase64);
+  } catch {
+    return { ok: false, error: 'Base64-Audiodaten konnten nicht dekodiert werden.' };
+  }
   const bytes = new Uint8Array(rawBinary.length);
   for (let i = 0; i < rawBinary.length; i++) {
     bytes[i] = rawBinary.charCodeAt(i);
@@ -218,7 +226,10 @@ chrome.runtime.onInstalled.addListener(() => {
   void loadSettings().then((settings) => saveSettings(settings));
 });
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (sender?.id !== chrome.runtime.id) {
+    return false;
+  }
   const msg = message as { type?: string; [key: string]: unknown };
 
   if (msg.type === 'GET_SETTINGS') {
